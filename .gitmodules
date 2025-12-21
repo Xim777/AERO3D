@@ -1,0 +1,3 @@
+[submodule "GS-SR"]
+	path = GS-SR
+	url = https://github.com/yanxian-ll/GS-SR.git
