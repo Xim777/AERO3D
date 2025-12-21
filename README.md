@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# AERO3D – GS-SR Desktop GUI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Electron + Vite + React frontend for GS-SR (bundled, CLI-free)**
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 1. Goal (non-negotiable)
 
-## React Compiler
+Build a **desktop GUI application** that allows users to run **GS-SR surface reconstruction** **without typing any terminal commands**, while keeping the **GS-SR Python backend completely untouched**.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The application will:
 
-## Expanding the ESLint configuration
+* Bundle the GS-SR repository
+* Provide a UI to:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+  * select datasets
+  * select reconstruction methods
+  * start / stop training
+  * monitor logs
+  * extract meshes
+  * access outputs
+* Execute GS-SR via its **existing CLI scripts**
+* Work as a **self-contained desktop app**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 2. Current directory layout (baseline – do not break)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+AERO3D/
+├── GS-SR/                 # Python backend (UNTOUCHED)
+│   ├── train.py
+│   ├── train_split.py
+│   ├── extract_mesh.py
+│   ├── extract_mesh_split.py
+│   ├── environment.yml
+│   └── ...
+│
+├── src/                   # React frontend (Vite)
+├── public/
+├── electron/              # (currently empty / minimal)
+├── dist-react/
+├── package.json
+├── vite.config.ts
+└── tsconfig*.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Rule**:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+* `GS-SR/` → NEVER modify Python files
+* Frontend lives in `src/`
+* Electron orchestration lives in `electron/`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 3. High-level architecture (fixed)
+
 ```
+React UI (src/)
+        ↓ IPC
+Electron Main (electron/)
+        ↓ spawn()
+GS-SR CLI (GS-SR/)
+```
+
+* React → UI only
+* Electron → process orchestration
+* GS-SR → black-box computation
