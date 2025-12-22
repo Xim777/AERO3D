@@ -1,55 +1,64 @@
 
-```md
-# AERO3D – GS-SR Desktop GUI
 
-AERO3D is a **desktop graphical user interface (GUI)** for **GS-SR (Gaussian-based Surface Reconstruction)** that allows users to perform **surface reconstruction and mesh extraction without using terminal commands**, while keeping the **GS-SR Python backend completely untouched**.
 
-The application bundles GS-SR as a black-box backend and executes it through existing CLI scripts using Electron process orchestration.
+# TRINETRA – GS-SR Desktop GUI
 
----
+TRINETRA is a self-contained desktop application that provides a graphical user interface (GUI) for **GS-SR (Gaussian-based Surface Reconstruction)**.  
+It allows users to run surface reconstruction workflows **without typing any terminal commands**, while keeping the **GS-SR Python backend completely untouched**.
 
-## 🔹 Key Goals (Non-Negotiable)
-
-- Provide a **CLI-free desktop interface** for GS-SR
-- Keep the **GS-SR repository completely unmodified**
-- Execute GS-SR using its **existing Python CLI scripts**
-- Support:
-  - Dataset selection
-  - Reconstruction method selection
-  - Training start/stop
-  - Log monitoring
-  - Mesh extraction
-  - Output access
-- Work as a **self-contained desktop application**
+The system uses **Electron + Vite + React** for the frontend and orchestration and executes GS-SR strictly through its **existing CLI scripts**.
 
 ---
 
-## 🔹 High-Level Architecture (Fixed)
 
-```
+## 1. Project Goal (Non-Negotiable)
 
+The primary goal of AERO3D is to:
+
+- Provide a desktop GUI for GS-SR
+- Eliminate terminal usage for end users
+- Execute GS-SR via existing CLI scripts only
+- Keep the GS-SR repository completely unmodified
+- Work as a self-contained desktop application
+
+The application enables users to:
+- Select datasets
+- Select reconstruction modes
+- Start and stop training
+- Monitor logs in real time
+- Extract meshes
+- Access reconstruction outputs
+
+---
+
+## 2. High-Level Architecture
+
+```text
 React UI (Vite + React)
-↓ IPC
+        ↓ IPC
 Electron Main Process
-↓ spawn()
+        ↓ spawn()
 GS-SR CLI Scripts (Python)
+````
 
-```
 
-- **React** → UI only
-- **Electron** → process orchestration + IPC
-- **GS-SR** → black-box computation
+### Component Responsibilities
 
-❌ No Python code modification  
-❌ No CLI exposure to users  
-❌ No GPU calls from Electron  
+* **React**: UI only
+* **Electron**: process orchestration and IPC
+* **GS-SR**: black-box computation
+
+### Strict Constraints
+
+* No Python code modification
+* No CLI exposure to users
+* No GPU calls from Electron
 
 ---
 
-## 🔹 Directory Structure (DO NOT BREAK)
+## 3. Directory Structure 
 
-```
-
+```bash
 AERO3D/
 ├── GS-SR/                 # Python backend (UNTOUCHED)
 │   ├── train.py
@@ -66,42 +75,42 @@ AERO3D/
 ├── package.json
 ├── vite.config.ts
 └── tsconfig*.json
+```
 
-````
+### Rules
 
-**Rules**
-- ❌ Never modify files inside `GS-SR/`
-- ✅ Frontend code lives in `src/`
-- ✅ Electron orchestration lives in `electron/`
-
----
-
-## 🔹 Platform & Hardware Requirements
-
-| Component | Requirement |
-|--------|------------|
-| OS | Linux / WSL2 (Recommended) |
-| GPU | NVIDIA GPU with CUDA support |
-| CUDA | **11.8 ONLY (Mandatory)** |
-| Python | 3.10 |
-| Compiler | **GCC 11 (Mandatory)** |
-| Node.js | 20.x (Linux / WSL only) |
-
-⚠ CUDA 12.x is **NOT supported** and will break GS-SR CUDA extensions.
+* `GS-SR/` must never be modified
+* Frontend code lives in `src/`
+* Electron orchestration lives in `electron/`
 
 ---
 
-## 🔹 CUDA 11.8 Installation (MANDATORY)
+## 4. Supported Platform and Hardware
 
-> **APT-based CUDA installs are NOT supported.**  
-> Use the NVIDIA **runfile installer only**.
+| Component | Requirement                |
+| --------- | -------------------------- |
+| OS        | Linux / WSL2 (Recommended) |
+| GPU       | NVIDIA CUDA-capable GPU    |
+| CUDA      | 11.8 ONLY (Mandatory)      |
+| Python    | 3.10                       |
+| Compiler  | GCC 11                     |
 
-### 1️⃣ Download CUDA 11.8 Runfile
+CUDA 12.x is not supported and will break GS-SR CUDA extensions.
+
+---
+
+## 5. CUDA 11.8 Installation (Mandatory)
+
+APT-based CUDA installations are not reliable on modern Ubuntu / WSL.
+The NVIDIA **runfile installer must be used**.
+
+### 5.1 Download CUDA 11.8 Runfile
+
 ```bash
 wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
-````
+```
 
-### 2️⃣ Install Toolkit Only (No Driver, No Nsight)
+### 5.2 Install Toolkit Only (No Driver, No Nsight)
 
 ```bash
 sudo sh cuda_11.8.0_520.61.05_linux.run \
@@ -111,7 +120,7 @@ sudo sh cuda_11.8.0_520.61.05_linux.run \
   --no-opengl-libs
 ```
 
-### 3️⃣ Environment Variables
+### 5.3 Environment Variables
 
 Add to `~/.bashrc`:
 
@@ -141,9 +150,9 @@ Cuda compilation tools, release 11.8
 
 ---
 
-## 🔹 GCC 11 Installation (MANDATORY)
+## 6. GCC 11 Installation (Mandatory)
 
-GS-SR CUDA extensions **will fail** without GCC 11.
+GS-SR CUDA extensions require GCC 11.
 
 ```bash
 sudo apt install gcc-11 g++-11
@@ -159,9 +168,9 @@ gcc --version
 
 ---
 
-## 🔹 Python Environment Setup (GS-SR Compatible)
+## 7. GS-SR Backend Setup
 
-### 1️⃣ Clone GS-SR
+### 7.1 Clone GS-SR
 
 ```bash
 cd AERO3D
@@ -169,21 +178,22 @@ git clone https://github.com/yanxian-ll/GS-SR
 cd GS-SR
 ```
 
-### 2️⃣ Create Conda Environment
+### 7.2 Create Conda Environment
 
 ```bash
 conda env create --file environment.yml
 conda activate gssr
 ```
 
-✔ Python 3.10 is supported
-❌ Python 3.8 is EOL and unsupported
+Python 3.10 is required.
+Python 3.8 is not supported.
 
 ---
 
-## 🔹 PyTorch Installation (CUDA 11.8 ONLY)
+## 8. PyTorch Installation (CUDA 11.8 Only)
 
-⚠ **Do NOT install PyTorch with conda CUDA builds**
+PyTorch must be installed via pip using official CUDA wheels.
+Conda CUDA PyTorch builds are not supported.
 
 ```bash
 pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 \
@@ -200,26 +210,26 @@ print(torch.version.cuda)
 EOF
 ```
 
-Expected:
+Expected output:
 
 ```
 True
 11.8
 ```
 
-❌ If this fails, do not proceed.
+If this check fails, do not proceed.
 
 ---
 
-## 🔹 GS-SR Dependencies & CUDA Extensions
+## 9. GS-SR CUDA Extensions
 
-From the `AERO3D` root:
+From the AERO3D root:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-If required:
+If required, install submodules individually:
 
 ```bash
 pip install -e GS-SR/submodules/simple-knn
@@ -231,9 +241,9 @@ pip install -e GS-SR/submodules/scaffold-filter
 
 ---
 
-## 🔹 COLMAP Installation (MANDATORY)
+## 10. COLMAP Installation (Mandatory)
 
-GS-SR uses **Structure-from-Motion (SfM)** via COLMAP.
+GS-SR relies on Structure-from-Motion using COLMAP.
 
 ```bash
 sudo apt install colmap
@@ -245,16 +255,18 @@ Verify:
 colmap --version
 ```
 
-**Reference**
-Schönberger, J. L., & Frahm, J. M. (2016). *Structure-from-Motion Revisited*. CVPR.
+Reference:
+Schönberger, J. L., and Frahm, J. M.,
+"Structure-from-Motion Revisited", CVPR 2016.
 
 ---
 
-## 🔹 Node.js & Frontend Setup (Linux / WSL ONLY)
+## 11. Node.js and Frontend Setup
 
-⚠ Do **NOT** use Windows Node.js with WSL files.
+Node.js must be installed inside Linux / WSL.
+Do not use Windows Node.js with WSL filesystems.
 
-Install Node via `nvm`:
+Install Node via nvm:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -277,45 +289,39 @@ npm run dev
 
 ---
 
-## 🔹 Execution Model
+## 12. Execution Model
 
-* Electron spawns GS-SR CLI scripts via `spawn()`
+* Electron spawns GS-SR CLI scripts using `spawn()`
 * Logs are streamed to the UI via IPC
 * Outputs are read from GS-SR result directories
-* No shell commands are exposed to users
+* No terminal access is exposed to users
 
 ---
 
-## 🔹 Explicit Non-Goals
+## 13. Explicit Non-Goals
 
-* ❌ Python refactoring
-* ❌ CUDA 12.x support
-* ❌ Conda CUDA PyTorch
-* ❌ Direct GPU access from Electron
-* ❌ CLI exposure to users
-
----
-
-## 🔹 One-Line Summary 
-
-> **AERO3D is a desktop GUI that orchestrates GS-SR surface reconstruction through Electron IPC, executing existing GS-SR CLI scripts under a strictly CUDA-11.8-compatible environment without modifying the GS-SR backend.**
+* No Python refactoring
+* No CUDA 12.x support
+* No conda-based CUDA PyTorch
+* No direct GPU calls from Electron
+* No CLI exposure to users
 
 ---
 
-## 📚 References
+## 14. References
 
-1. Kerbl et al., *3D Gaussian Splatting for Real-Time Radiance Field Rendering*, ACM TOG, 2023
-2. Yan et al., *GS-SR: Gaussian-based Surface Reconstruction*, GitHub Repository
-3. Schönberger & Frahm, *Structure-from-Motion Revisited*, CVPR 2016
+1. Kerbl et al., "3D Gaussian Splatting for Real-Time Radiance Field Rendering", ACM TOG, 2023
+2. Yan et al., GS-SR: Gaussian-based Surface Reconstruction, GitHub Repository
+3. Schönberger and Frahm, "Structure-from-Motion Revisited", CVPR 2016
 4. NVIDIA CUDA Toolkit 11.8 Documentation
-5. PyTorch CUDA 11.8 Official Wheels
+5. PyTorch CUDA 11.8 Wheels Documentation
 
 ---
 
-```
+## 15. Summary
 
+AERO3D provides a desktop GUI for GS-SR by orchestrating existing GS-SR CLI scripts through Electron IPC, enabling CUDA-11.8-compatible surface reconstruction without modifying the GS-SR backend.
+
+```
 ---
 
-
-Just tell me what you want next.
-```
